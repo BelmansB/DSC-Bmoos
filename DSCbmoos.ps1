@@ -16,8 +16,8 @@ Configuration bmoos_dsc
     Import-DscResource -Module NetworkingDsc -ModuleVersion 7.4.0.0
     Import-DscResource -Module ComputerManagementDsc -ModuleVersion 7.1.0.0
     Import-DscResource -ModuleName ActiveDirectoryDsc -ModuleVersion 5.0.0
-    Import-DscResource -Module Xdhcpserver -ModuleVersion 2.0.0.0
-    Import-DscResource -ModuleName xSmbshare -ModuleVersion 2.2.0.0
+    Import-DscResource -Module XDhcpServer
+    Import-DscResource -ModuleName xSMBShare
        
     Node $allnodes.nodename
     {
