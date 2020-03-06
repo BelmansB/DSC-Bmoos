@@ -12,7 +12,7 @@ Configuration bmoos_dsc
         [System.Management.Automation.PSCredential]
         $SafeModePassword
     )
-      
+    Import-DscResource -ModuleName PSDscResources  
     Import-DscResource -Module NetworkingDsc -ModuleVersion 7.4.0.0
     Import-DscResource -Module ComputerManagementDsc -ModuleVersion 7.1.0.0
     Import-DscResource -ModuleName ActiveDirectoryDsc -ModuleVersion 5.0.0
@@ -78,7 +78,7 @@ Configuration bmoos_dsc
 
         ### xDhcpServer 
         ### https://github.com/dsccommunity/xDhcpServer
-        WindowsFeature “dhcp-server”
+        WindowsFeature “DHCP-Server”
         {
             Name      = “DHCP”
             Ensure    = “Present”
@@ -89,21 +89,21 @@ Configuration bmoos_dsc
         {
             Name      = "RSAT-DHCP"
             Ensure    = "Present"
-            DependsOn = '[WindowsFeature]dhcp-server'
+            DependsOn = '[WindowsFeature]DHCP-server'
         }
                
-        XDhcpServerScope “DHCPConfig”
+        xDhcpServerScope "Scope"
         {
-            ScopeId       = "192.168.1.20"
-            IPendrange    = “192.168.1.100”
-            IPStartrange  = “192.168.1.20”
-            subnetmask    = “255.255.255.0”
-            Ensure        = “Present”
-            Name          = “IPV4Scope”
-            State         = “Active”
-            LeaseDuration = ((New-TimeSpan -hours 8 ).ToString())
-            AddressFamily = “IPV4”
-            DependsOn     = "[WindowsFeature]dhcp-server"
+            Ensure = 'Present'
+            ScopeID = '192.168.1.0'
+            IPStartRange = '192.168.1.20' 
+            IPEndRange = '192.168.1.200'
+            Name = 'IPv4ScopeBmoos' 
+            SubnetMask = '255.255.255.0' 
+            LeaseDuration = '00:08:00' 
+            State = 'Active' 
+            AddressFamily = 'IPv4'
+            DependsOn     = "[WindowsFeature]DHCP-server"
         }
 
         XDhcpServerAuthorization Authorization
