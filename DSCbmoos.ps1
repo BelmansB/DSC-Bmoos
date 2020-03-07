@@ -18,6 +18,7 @@ Configuration bmoos_dsc
     Import-DscResource -ModuleName ActiveDirectoryDsc -ModuleVersion 5.0.0
     Import-DscResource -Module XDhcpServer -ModuleVersion 2.0.0.0
     Import-DscResource -ModuleName xSMBShare
+    Import-DSCResource -ModuleName xInternetExplorerHomePage 
        
     Node $allnodes.nodename
     {
@@ -168,13 +169,6 @@ Configuration bmoos_dsc
             Ensure = 'Present'
             Members = 'User1', 'User2', 'User3', 'User4', 'User5'
         }
-
-        File WebsiteContent
-        {
-            Ensure = 'Present'
-            SourcePath = 'c:\test\index.htm'
-            DestinationPath = 'c:\inetpub\wwwroot'
-        }
         File HR
         {
             DestinationPath = 'C:\Fileserver\HR'
@@ -187,7 +181,7 @@ Configuration bmoos_dsc
             Name = 'HR'
             Path = 'C:\Fileserver\HR'
             FullAccess = 'administrator'
-            ReadAccess = 'bmoos.local\FileServer_R'
+            ReadAccess = 'FileServer_R'
             FolderEnumerationMode = 'AccessBased'
             Ensure = 'Present'
             DependsOn = '[File]HR'
@@ -204,7 +198,7 @@ Configuration bmoos_dsc
             Name = 'Marketing'
             Path = 'C:\Fileserver\Marketing'
             FullAccess = 'administrator'
-            ReadAccess = 'bmoos.local\FileServer_R'
+            ReadAccess = 'FileServer_R'
             FolderEnumerationMode = 'AccessBased'
             Ensure = 'Present'
             DependsOn = '[File]Marketing'
@@ -221,7 +215,7 @@ Configuration bmoos_dsc
             Name = 'Production'
             Path = 'C:\Fileserver\Production'
             FullAccess = 'administrator'
-            ReadAccess = 'bmoos.local\FileServer_R'
+            ReadAccess = 'FileServer_R'
             FolderEnumerationMode = 'AccessBased'
             Ensure = 'Present'
             DependsOn = '[File]Production'
@@ -238,7 +232,7 @@ Configuration bmoos_dsc
             Name = 'Research'
             Path = 'C:\Fileserver\Research'
             FullAccess = 'administrator'
-            ReadAccess = 'bmoos.local\FileServer_R'
+            ReadAccess = 'FileServer_R'
             FolderEnumerationMode = 'AccessBased'
             Ensure = 'Present'
             DependsOn = '[File]Research'
@@ -255,11 +249,12 @@ Configuration bmoos_dsc
             Name = 'Logistics'
             Path = 'C:\Fileserver\Logistics'
             FullAccess = 'administrator'
-            ReadAccess = 'bmoos.local\FileServer_R'
+            ReadAccess = 'FileServer_R'
             FolderEnumerationMode = 'AccessBased'
             Ensure = 'Present'
             DependsOn = '[File]Logistics'
         }
+
         File web
         {
             DestinationPath = 'c:\inetpub\wwwroot\web'
@@ -267,9 +262,22 @@ Configuration bmoos_dsc
             Ensure = 'Present'
             DependsOn= '[WindowsFeature]WebServer'
         }
+        xInternetExplorerHomePage IEHomePage 
+        { 
+          StartPage = $StartPageURL 
+          Ensure = 'present'
+          DependsOn='[WindowsFeature]WebServer'
+        } 
+        
+        Firewall EnableBuiltInFirewallRule
+        {
+          Name                  = 'IIS-WebServerRole-HTTP-In-TCP'
+          Ensure                = 'Present'
+          Enabled               = 'True'
+          DependsOn             ='[file]websitecontent'
+        } 
     }
 }   
-
 
 $cd = @{
     AllNodes = @(   
@@ -279,7 +287,6 @@ $cd = @{
         }
     )
 }
-
 
 Bmoos_dsc -ConfigurationData $cd
 Start-DscConfiguration .\bmoos_dsc -Verbose -Wait -Force

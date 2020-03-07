@@ -6,3 +6,4 @@ Install-Module -Name xDhcpServer -RequiredVersion 2.0.0.0
 #Install-Module -Name xDhcpServer -RequiredVersion 1.6.0.0
 Install-Module -Name xSmbshare -RequiredVersion 2.2.0.0
 Install-Module -Name PSDscResources
+Install-Module -Name xInternetExplorerHomePage
