@@ -10,7 +10,18 @@ Configuration bmoos_dsc
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $SafeModePassword
+        $SafeModePassword,
+
+        #Specifies the URL for the home page of Internet Explorer. 
+        [Parameter(Mandatory)]   
+        [ValidateNotNullOrEmpty()]   
+        [String]$StartPageURL,     
+   
+        #Set the value as 'Present'/'Absent', it indicates the IE home page is configured/unconfigured. 
+        [Parameter(Mandatory)]   
+        [ValidateSet('Present','Absent')]   
+        [String]$SetEnsure
+
     )
     Import-DscResource -ModuleName PSDscResources  
     Import-DscResource -Module NetworkingDsc -ModuleVersion 7.4.0.0
@@ -120,11 +131,12 @@ Configuration bmoos_dsc
             Name   = "Web-Server"
 	    DependsOn     = "[WindowsFeature]RSATDHCP"
         }
+
         ADUser 'bmoos\User1'
         {
             Ensure     = 'Present'
             UserName   = 'User1'
-            Password   = $Password
+            Password   = ''
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -132,7 +144,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User2'
-            Password   = $Password
+            Password   = ''
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -140,7 +152,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User3'
-            Password   = $Password
+            Password   = ''
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -148,7 +160,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User4'
-            Password   = $Password
+            Password   = ''
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -156,7 +168,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User5'
-            Password   = $Password
+            Password   = ''
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -254,28 +266,33 @@ Configuration bmoos_dsc
             Ensure = 'Present'
             DependsOn = '[File]Logistics'
         }
-
-        File web
+        File Website
         {
             DestinationPath = 'c:\inetpub\wwwroot\web'
             Type = 'Directory'
             Ensure = 'Present'
             DependsOn= '[WindowsFeature]WebServer'
         }
+        Firewall EnableBuiltInFirewallRule
+        {
+            Name = 'IIS-WebServerRole-HTTP-In-TCP'
+            Ensure = 'Present'
+            Enabled = 'True'
+            DependsOn ='[File]Website'
+        }
+        File WebsiteContent 
+        {
+            Ensure = 'Present'
+            SourcePath = 'C:\test\index.html'
+            DestinationPath = 'C:\inetpub\wwwroot\'
+            DependsOn='[File]Website'
+        }
         xInternetExplorerHomePage IEHomePage 
         { 
           StartPage = $StartPageURL 
-          Ensure = 'present'
+          Ensure = 'Present'
           DependsOn='[WindowsFeature]WebServer'
-        } 
-        
-        Firewall EnableBuiltInFirewallRule
-        {
-          Name                  = 'IIS-WebServerRole-HTTP-In-TCP'
-          Ensure                = 'Present'
-          Enabled               = 'True'
-          DependsOn             ='[file]websitecontent'
-        } 
+        }        
     }
 }   
 
@@ -288,5 +305,7 @@ $cd = @{
     )
 }
 
-Bmoos_dsc -ConfigurationData $cd
+
+Bmoos_dsc -ConfigurationData $cd 
+Bmoos_dsc -StartPageURL "C:\test\index.html" -SetEnsure 'Present'
 Start-DscConfiguration .\bmoos_dsc -Verbose -Wait -Force
