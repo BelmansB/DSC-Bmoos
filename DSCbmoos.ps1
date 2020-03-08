@@ -12,16 +12,7 @@ Configuration bmoos_dsc
         [System.Management.Automation.PSCredential]
         $SafeModePassword,
 
-        #Specifies the URL for the home page of Internet Explorer. 
-        [Parameter(Mandatory)]   
-        [ValidateNotNullOrEmpty()]   
-        [String]$StartPageURL,     
-   
-        #Set the value as 'Present'/'Absent', it indicates the IE home page is configured/unconfigured. 
-        [Parameter(Mandatory)]   
-        [ValidateSet('Present','Absent')]   
-        [String]$SetEnsure
-
+        $StartPageURL = 'C:\inetpub\wwwroot\index.html'
     )
     Import-DscResource -ModuleName PSDscResources  
     Import-DscResource -Module NetworkingDsc -ModuleVersion 7.4.0.0
@@ -136,7 +127,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User1'
-            Password   = ''
+            Password   = $Password
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -144,7 +135,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User2'
-            Password   = ''
+            Password   = $Password
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -152,7 +143,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User3'
-            Password   = ''
+            Password   = $Password
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -160,7 +151,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User4'
-            Password   = ''
+            Password   = $Password
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -168,7 +159,7 @@ Configuration bmoos_dsc
         {
             Ensure     = 'Present'
             UserName   = 'User5'
-            Password   = ''
+            Password   = $Password
             DomainName = 'bmoos.local'
             Path       = 'CN=Users,DC=bmoos,DC=local'
         }
@@ -305,7 +296,5 @@ $cd = @{
     )
 }
 
-
 Bmoos_dsc -ConfigurationData $cd 
-Bmoos_dsc -StartPageURL "C:\test\index.html" -SetEnsure 'Present'
 Start-DscConfiguration .\bmoos_dsc -Verbose -Wait -Force
