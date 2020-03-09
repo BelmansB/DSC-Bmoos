@@ -7,9 +7,8 @@ configuration LCMConfig
         {
             RefreshMode = 'Push'
             RebootNodeIfNeeded = $True
-RefreshFrequencyMins =             30
-ConfigurationMode = 'ApplyAndAutoCorrect'
-
+            RefreshFrequencyMins =             15
+            ConfigurationMode = 'ApplyAndAutoCorrect'
         }
     }
 }

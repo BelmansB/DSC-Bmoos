@@ -296,5 +296,5 @@ $cd = @{
     )
 }
 
-Bmoos_dsc -ConfigurationData $cd 
+Bmoos_dsc -ConfigurationData $cd -StartPageURL "http://bmoos"
 Start-DscConfiguration .\bmoos_dsc -Verbose -Wait -Force
