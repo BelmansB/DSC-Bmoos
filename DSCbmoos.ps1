@@ -10,9 +10,7 @@ Configuration bmoos_dsc
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $SafeModePassword,
-
-        $StartPageURL = 'C:\inetpub\wwwroot\index.html'
+        $SafeModePassword
     )
     Import-DscResource -ModuleName PSDscResources  
     Import-DscResource -Module NetworkingDsc -ModuleVersion 7.4.0.0
@@ -20,7 +18,8 @@ Configuration bmoos_dsc
     Import-DscResource -ModuleName ActiveDirectoryDsc -ModuleVersion 5.0.0
     Import-DscResource -Module XDhcpServer -ModuleVersion 2.0.0.0
     Import-DscResource -ModuleName xSMBShare
-    Import-DSCResource -ModuleName xInternetExplorerHomePage 
+    Import-DSCResource -ModuleName IISConsole
+    Import-DSCResource -ModuleName IISScriptingTools
        
     Node $allnodes.nodename
     {
@@ -114,14 +113,6 @@ Configuration bmoos_dsc
             Ensure        = “Present”
             IPAddress     = "192.168.1.10"
         }
-
-        ### IIS
-        WindowsFeature WebServer
-        {
-            Ensure = "Present"
-            Name   = "Web-Server"
-	    DependsOn     = "[WindowsFeature]RSATDHCP"
-        }
 
         ADUser 'bmoos\User1'
         {
@@ -257,13 +248,6 @@ Configuration bmoos_dsc
             Ensure = 'Present'
             DependsOn = '[File]Logistics'
         }
-        File Website
-        {
-            DestinationPath = 'c:\inetpub\wwwroot\web'
-            Type = 'Directory'
-            Ensure = 'Present'
-            DependsOn= '[WindowsFeature]WebServer'
-        }
         Firewall EnableBuiltInFirewallRule
         {
             Name = 'IIS-WebServerRole-HTTP-In-TCP'
@@ -271,19 +255,43 @@ Configuration bmoos_dsc
             Enabled = 'True'
             DependsOn ='[File]Website'
         }
-        File WebsiteContent 
+
+        ### IIS
+        WindowsFeature WebServer
         {
-            Ensure = 'Present'
-            SourcePath = 'C:\test\index.html'
-            DestinationPath = 'C:\inetpub\wwwroot\'
-            DependsOn='[File]Website'
+            Ensure = "Present"
+            Name   = "Web-Server"
         }
-        xInternetExplorerHomePage IEHomePage 
-        { 
-          StartPage = $StartPageURL 
-          Ensure = 'Present'
-          DependsOn='[WindowsFeature]WebServer'
-        }        
+
+        WindowsFeature IISConsole
+        {
+            Ensure    = 'Present'
+            Name      = 'Web-Mgmt-Console'
+            DependsOn = '[WindowsFeature]WebServer'
+        }
+
+        WindowsFeature IISScriptingTools
+        {
+            Ensure    = 'Present'
+            Name      = 'Web-Scripting-Tools'
+            DependsOn = @('[WindowsFeature]WebServer', '[WindowsFeature]IISConsole')
+        }
+       
+        File WebsiteContent
+        {
+            Ensure          = 'Present'
+            Type            = 'File'
+            #SourcePath     = 'c:\test\index.htm'
+            DestinationPath = 'c:\inetpub\wwwroot\index.htm'
+            Contents        =
+            "<html>
+                <body>
+                    <h1>Hallo Iedereen</h1>
+                    <br><h1>Dankzij Covid19, is ons Coronabier uit ons gamma gehaald. Alles is opgehaald door Bart Belmans</h1>
+                    <br><h1>Met vriendelijke groeten</h1>
+                </body>
+            </html>"
+        }       
     }
 }   
 
@@ -296,5 +304,5 @@ $cd = @{
     )
 }
 
-Bmoos_dsc -ConfigurationData $cd -StartPageURL "http://bmoos"
+Bmoos_dsc -ConfigurationData $cd
 Start-DscConfiguration .\bmoos_dsc -Verbose -Wait -Force
