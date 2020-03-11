@@ -18,8 +18,7 @@ Configuration bmoos_dsc
     Import-DscResource -ModuleName ActiveDirectoryDsc -ModuleVersion 5.0.0
     Import-DscResource -Module XDhcpServer -ModuleVersion 2.0.0.0
     Import-DscResource -ModuleName xSMBShare
-    Import-DSCResource -ModuleName IISConsole
-    Import-DSCResource -ModuleName IISScriptingTools
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration -ModuleVersion 9.0.0
        
     Node $allnodes.nodename
     {
