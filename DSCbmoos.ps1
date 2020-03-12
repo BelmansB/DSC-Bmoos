@@ -252,7 +252,7 @@ Configuration bmoos_dsc
             Name = 'IIS-WebServerRole-HTTP-In-TCP'
             Ensure = 'Present'
             Enabled = 'True'
-            DependsOn ='[File]Website'
+            DependsOn ='[File]Logistics'
         }
 
         ### IIS
